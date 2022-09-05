@@ -1,0 +1,5 @@
+com/sain/processor/ProcessingException.class
+com/sain/processor/FactoryAnnotatedClass.class
+com/sain/processor/FactoryGroupedClasses.class
+com/sain/processor/FactoryProcessor.class
+META-INF/services/javax.annotation.processing.Processor

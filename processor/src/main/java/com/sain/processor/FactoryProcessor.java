@@ -11,6 +11,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import java.io.IOException;
 import java.util.*;
 
 @AutoService(Processor.class)
@@ -46,21 +47,22 @@ public class FactoryProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         // Iterate over all @Factory annotated elements
-        for (Element annotatatedElement : roundEnv.getElementsAnnotatedWith(Factory.class)) {
+
+        for (Element annotated : roundEnv.getElementsAnnotatedWith(Factory.class)) {
 
             // Checks if the element annotation with Factory is a class
-            if (annotatatedElement.getKind() != ElementKind.CLASS) {
+            if (annotated.getKind() != ElementKind.CLASS) {
 
-                error(annotatatedElement, "Only classes annotatated with @%s",
+                error(annotated, "Only classes annotatated with @%s",
                         Factory.class.getSimpleName());
 
                 return true;
             }
 
-            TypeElement typeElement = (TypeElement) annotatatedElement;
+            TypeElement typeElement = (TypeElement) annotated;
 
             try {
-                FactoryAnnotatedClass annotatedClass = new FactoryAnnotatedClass(typeElement);
+                FactoryAnnotatedClass annotatedClass = new FactoryAnnotatedClass(typeElement, messager);
 
                 if (!isValidClass(annotatedClass)) {
                     return true;
@@ -80,7 +82,19 @@ public class FactoryProcessor extends AbstractProcessor {
                 error(typeElement, e.getMessage());
                 return true;
             }
+
         }
+        try {
+            for (FactoryGroupedClasses factoryClass: factoryClasses.values()) {
+                factoryClass.generateCode(elementUtils, filer);
+
+                factoryClasses.clear();
+            }
+        } catch (IOException e) {
+            error(null, e.getMessage());
+        }
+        messager.printMessage(Diagnostic.Kind.NOTE, "HELLLOOOOOO!!!!!!");
+        return true;
     }
 
     private boolean isValidClass(FactoryAnnotatedClass factoryAnnotatedClass) {

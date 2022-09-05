@@ -15,8 +15,10 @@ public class PizzaStore {
 
      */
 
+    private MealFactory factory = new MealFactory();
+
     public Meal order(String mealName) {
-        return new CalzonePizza();
+        return factory.create(mealName);
     }
 
     private static String readConsole() throws IOException {

@@ -2,9 +2,12 @@ package com.sain.processor;
 
 import com.sain.annotation.Factory;
 
+import javax.annotation.processing.Messager;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
+import javax.tools.Diagnostic;
 
 public class FactoryAnnotatedClass {
 
@@ -12,8 +15,10 @@ public class FactoryAnnotatedClass {
     private String qualifiedSuperClassName;
     private String simpleTypeName;
     private String id;
+    private Messager messager;
 
-    public FactoryAnnotatedClass(TypeElement classElement) throws IllegalArgumentException{
+    public FactoryAnnotatedClass(TypeElement classElement, Messager messager) throws IllegalArgumentException{
+        this.messager = messager;
         this.annotatedClassElement = classElement;
         Factory annotation = classElement.getAnnotation(Factory.class);
         id = annotation.id();
@@ -49,6 +54,9 @@ public class FactoryAnnotatedClass {
             qualifiedSuperClassName = classTypeElement.getQualifiedName().toString();
             simpleTypeName = classTypeElement.getSimpleName().toString();
         }
+
+        debug(classElement,"QualifiedSuperClassName: %s \n SimpleTypeName: %s", qualifiedSuperClassName, simpleTypeName);
+
     }
 
     /**
@@ -82,5 +90,13 @@ public class FactoryAnnotatedClass {
      */
     public String getId() {
         return id;
+    }
+
+    private void debug(Element e, String msg, Object... args) {
+        messager.printMessage(
+                Diagnostic.Kind.NOTE,
+                String.format(msg, args),
+                e
+        );
     }
 }
